@@ -1,0 +1,39 @@
+{
+  "name": "material-workshop",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "clean:appledouble": "find . -path './node_modules' -prune -o -type f -name '._*' -delete",
+    "postinstall": "pnpm clean:appledouble",
+    "dev": "concurrently -k -n api,web -c green,cyan \"tsx watch server/index.ts\" \"vite --host 0.0.0.0\"",
+    "build": "tsc -b && tsc -p tsconfig.server.build.json && vite build",
+    "start": "node dist/server/index.js",
+    "typecheck": "tsc -b --pretty false",
+    "test": "pnpm clean:appledouble && vitest run"
+  },
+  "dependencies": {
+    "@fastify/multipart": "^9.2.1",
+    "@fastify/static": "^9.1.1",
+    "@tanstack/react-query": "^5.101.2",
+    "fastify": "^5.6.0",
+    "file-type": "^22.0.1",
+    "lucide-react": "^0.577.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "sharp": "^0.34.3",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.2",
+    "concurrently": "^9.2.1",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "vite": "^7.3.1",
+    "vitest": "^3.2.4"
+  }
+}
