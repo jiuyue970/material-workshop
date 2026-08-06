@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "clean:appledouble": "find . -path './node_modules' -prune -o -type f -name '._*' -delete",
     "postinstall": "pnpm clean:appledouble",
@@ -11,9 +13,13 @@
     "build": "tsc -b && tsc -p tsconfig.server.build.json && vite build",
     "start": "node dist/server/index.js",
     "typecheck": "tsc -b --pretty false",
+    "tunnel": "bash scripts/comfy-tunnel.sh start",
+    "tunnel:stop": "bash scripts/comfy-tunnel.sh stop",
+    "tunnel:status": "bash scripts/comfy-tunnel.sh status",
     "test": "pnpm clean:appledouble && vitest run"
   },
   "dependencies": {
+    "@excalidraw/excalidraw": "0.18.1",
     "@fastify/multipart": "^9.2.1",
     "@fastify/static": "^9.1.1",
     "@tanstack/react-query": "^5.101.2",

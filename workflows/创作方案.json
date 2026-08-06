@@ -1,0 +1,408 @@
+{
+  "16": {
+    "inputs": {
+      "unet_name": "krea2_turbo_fp8.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "UNet加载器"
+    }
+  },
+  "17": {
+    "inputs": {
+      "vae_name": "qwen_image_vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "加载VAE"
+    }
+  },
+  "18": {
+    "inputs": {
+      "clip_name": "qwen3vl_4b_bf16.safetensors",
+      "type": "krea2",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "加载CLIP"
+    }
+  },
+  "54": {
+    "inputs": {
+      "samples": [
+        "254",
+        0
+      ],
+      "vae": [
+        "17",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE解码"
+    }
+  },
+  "60": {
+    "inputs": {
+      "text": [
+        "271",
+        0
+      ],
+      "clip": [
+        "18",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Positive Prompt)"
+    }
+  },
+  "191": {
+    "inputs": {
+      "images": [
+        "54",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "预览图像"
+    }
+  },
+  "210": {
+    "inputs": {
+      "seed": 967061905478826
+    },
+    "class_type": "Seed Generator",
+    "_meta": {
+      "title": "Seed Generator"
+    }
+  },
+  "248": {
+    "inputs": {
+      "conditioning": [
+        "60",
+        0
+      ]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": {
+      "title": "条件零化"
+    }
+  },
+  "254": {
+    "inputs": {
+      "seed": [
+        "210",
+        0
+      ],
+      "steps": 15,
+      "cfg": 1,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "ddim_uniform",
+      "denoise": 1,
+      "model": [
+        "266",
+        0
+      ],
+      "positive": [
+        "60",
+        0
+      ],
+      "negative": [
+        "248",
+        0
+      ],
+      "latent_image": [
+        "264",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "K采样器"
+    }
+  },
+  "255": {
+    "inputs": {
+      "seed": [
+        "210",
+        0
+      ],
+      "steps": 6,
+      "cfg": 1,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "simple",
+      "denoise": 0.3,
+      "model": [
+        "266",
+        0
+      ],
+      "positive": [
+        "60",
+        0
+      ],
+      "negative": [
+        "248",
+        0
+      ],
+      "latent_image": [
+        "286",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "K采样器"
+    }
+  },
+  "263": {
+    "inputs": {
+      "filename_prefix": "MUSE",
+      "images": [
+        "287",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "保存图像"
+    }
+  },
+  "264": {
+    "inputs": {
+      "width": 1152,
+      "height": 1536,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "空Latent图像"
+    }
+  },
+  "266": {
+    "inputs": {
+      "PowerLoraLoaderHeaderWidget": {
+        "type": "PowerLoraLoaderHeaderWidget"
+      },
+      "lora_1": {
+        "on": false,
+        "lora": "krea2_lora_ 布丁.safetensors",
+        "strength": 0.5
+      },
+      "lora_2": {
+        "on": false,
+        "lora": "krea2_lora_丝.safetensors",
+        "strength": 0.5
+      },
+      "lora_3": {
+        "on": false,
+        "lora": "krea2_lora_xhs.safetensors",
+        "strength": 0.5
+      },
+      "lora_4": {
+        "on": false,
+        "lora": "krea2_lora_sex.safetensors",
+        "strength": 0.6
+      },
+      "lora_5": {
+        "on": false,
+        "lora": "krea2_lora_ccd.safetensors",
+        "strength": 0.3
+      },
+      "lora_6": {
+        "on": false,
+        "lora": "krea2_lora 五毛.safetensors",
+        "strength": 0.6
+      },
+      "lora_7": {
+        "on": false,
+        "lora": "krea2_lora_阿黑颜.safetensors",
+        "strength": 0.75
+      },
+      "lora_8": {
+        "on": false,
+        "lora": "krea2_lora_真汉服.safetensors",
+        "strength": 0.8
+      },
+      "lora_9": {
+        "on": false,
+        "lora": "krea2_lora_大锤.safetensors",
+        "strength": 0.8
+      },
+      "lora_10": {
+        "on": false,
+        "lora": "krea2_lora_lolita.safetensors",
+        "strength": 0.6
+      },
+      "lora_11": {
+        "on": false,
+        "lora": "krea2_lora_cxx.safetensors",
+        "strength": 0.3
+      },
+      "lora_12": {
+        "on": false,
+        "lora": "krea2_lora_男娘.safetensors",
+        "strength": 0.6
+      },
+      "lora_13": {
+        "on": false,
+        "lora": "BreastSlider-KREA2.safetensors",
+        "strength": 3
+      },
+      "lora_14": {
+        "on": false,
+        "lora": "WeightSlider-KREA2_v2.safetensors",
+        "strength": -6
+      },
+      "lora_15": {
+        "on": false,
+        "lora": "Detailer-KREA2.safetensors",
+        "strength": 3
+      },
+      "lora_16": {
+        "on": false,
+        "lora": "RealismSlider-v1.safetensors",
+        "strength": 2
+      },
+      "lora_17": {
+        "on": false,
+        "lora": "AmateurSlider-KREA2_v1.safetensors",
+        "strength": 1.5
+      },
+      "lora_18": {
+        "on": false,
+        "lora": "krea2_lora_x.safetensors",
+        "strength": 0.8
+      },
+      "lora_19": {
+        "on": false,
+        "lora": "krea2_lora_pussy.safetensors",
+        "strength": 0
+      },
+      "lora_20": {
+        "on": false,
+        "lora": "krea2_lora_yjs.safetensors",
+        "strength": 0
+      },
+      "lora_21": {
+        "on": false,
+        "lora": "krea2_lora_梦核.safetensors",
+        "strength": 0
+      },
+      "lora_22": {
+        "on": false,
+        "lora": "krea2_lora_皮裤.safetensors",
+        "strength": 0
+      },
+      "lora_23": {
+        "on": false,
+        "lora": "krea2_lora_Patreon.safetensors",
+        "strength": 0
+      },
+      "lora_24": {
+        "on": false,
+        "lora": "krea2_lora_niannian.safetensors",
+        "strength": 0
+      },
+      "lora_25": {
+        "on": false,
+        "lora": "krea2_lora_相扑猫.safetensors",
+        "strength": 0
+      },
+      "lora_26": {
+        "on": false,
+        "lora": "krea2_lora_SEX2.safetensors",
+        "strength": 0
+      },
+      "➕ Add Lora": "",
+      "model": [
+        "16",
+        0
+      ]
+    },
+    "class_type": "Power Lora Loader (rgthree)",
+    "_meta": {
+      "title": "Power Lora Loader (rgthree)"
+    }
+  },
+  "271": {
+    "inputs": {
+      "string": "中景镜头，正面朝向镜头的东亚年轻女性，深色齐肩短发，头部低垂，面部被自身头发完全遮挡，上半身完全裸露、双侧乳房清晰可见，腰腹纤细，下半身围裹着带有褶皱质感的白色裙装；人物身后配有一对巨型蓬松的白色羽毛天使翅膀，翅膀向画面左右两侧大幅展开，边缘羽毛舒展尖锐，从身体两侧向内包裹住人物；人物左臂向上弯曲抬起，左手抓握住左侧翅膀的羽毛，右臂横向收拢在腰腹前方，右手搭在腰侧的裙装之上；整体为夜晚昏暗低光环境，采用柔和侧光打亮人物与翅膀，整体色温偏低，呈现清冷的灰蓝色调，画面带有动态模糊的柔焦朦胧效果，景深较浅，背景虚化呈现夜晚露天天台场景，远处可见模糊的护栏栏杆与零星的城市光点，整体氛围清冷寂寥，充满沉静的情绪氛围感。"
+    },
+    "class_type": "String Literal",
+    "_meta": {
+      "title": "String Literal"
+    }
+  },
+  "283": {
+    "inputs": {
+      "method": "channel_wise",
+      "strength": 0.2,
+      "device": "auto",
+      "latent": [
+        "255",
+        0
+      ],
+      "reference": [
+        "254",
+        0
+      ]
+    },
+    "class_type": "LatentColorMatchSimple",
+    "_meta": {
+      "title": "🎨 Latent Color Match (Simple)"
+    }
+  },
+  "285": {
+    "inputs": {
+      "resampling": "lanczos",
+      "target_size": 4096,
+      "multiple_of": 64,
+      "image": [
+        "54",
+        0
+      ]
+    },
+    "class_type": "image resize",
+    "_meta": {
+      "title": "Image Resize"
+    }
+  },
+  "286": {
+    "inputs": {
+      "pixels": [
+        "285",
+        0
+      ],
+      "vae": [
+        "17",
+        0
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE编码"
+    }
+  },
+  "287": {
+    "inputs": {
+      "samples": [
+        "283",
+        0
+      ],
+      "vae": [
+        "17",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE解码"
+    }
+  }
+}
