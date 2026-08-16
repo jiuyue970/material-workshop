@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, Download, Image as ImageIcon, Images, LoaderCircle, Plus, RefreshCw, Settings2, Sparkles, Trash2, Upload, X } from 'lucide-react';
+import { Aperture, Check, Download, Image as ImageIcon, Images, LoaderCircle, Plus, RefreshCw, Settings2, Sparkles, Trash2, Upload, X } from 'lucide-react';
 import { api, json } from './api';
 import type { Asset, Job, Provider } from './types';
 
@@ -18,6 +18,8 @@ export default function App() {
   const [prompt, setPrompt] = useState(''); const [providerId, setProviderId] = useState('');
   const [width, setWidth] = useState(1024); const [height, setHeight] = useState(1024);
   const [quality, setQuality] = useState('auto'); const [format, setFormat] = useState('png'); const [count, setCount] = useState(1);
+  const [mode, setMode] = useState<'manual' | 'fantasy'>('manual');
+  const [fantasyText, setFantasyText] = useState(''); const [fantasyCamera, setFantasyCamera] = useState('auto');
   const providers = useQuery({ queryKey: ['providers'], queryFn: () => api<{ items: Provider[] }>('/providers') });
   const assets = useQuery({ queryKey: ['assets'], queryFn: () => api<{ items: Asset[] }>('/assets') });
   const jobs = useQuery({ queryKey: ['jobs'], queryFn: () => api<{ items: Job[] }>('/jobs'), refetchInterval: (query) => query.state.data?.items.some((job) => running.has(job.status)) ? 1500 : false });
@@ -25,6 +27,8 @@ export default function App() {
   useEffect(() => { if (!providerId && selectedProvider) setProviderId(selectedProvider.id); }, [providerId, selectedProvider]);
   const refresh = () => Promise.all([client.invalidateQueries({ queryKey: ['assets'] }), client.invalidateQueries({ queryKey: ['jobs'] }), client.invalidateQueries({ queryKey: ['providers'] })]);
   const generate = useMutation({ mutationFn: () => api('/jobs', { method: 'POST', ...json({ providerId: selectedProvider!.id, prompt, width, height, quality, format, count }) }), onSuccess: async () => { setPrompt(''); await refresh(); } });
+  const fantasyEntries = fantasyText.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  const fantasyGenerate = useMutation({ mutationFn: () => api<{ count: number }>('/fantasy-photography', { method: 'POST', ...json({ providerId: selectedProvider!.id, text: fantasyText, camera: fantasyCamera, width, height, quality, format }) }), onSuccess: async () => { setFantasyText(''); await refresh(); } });
   const deleteAsset = useMutation({ mutationFn: (id: string) => api(`/assets/${id}`, { method: 'DELETE' }), onSuccess: refresh });
   const jobAction = useMutation({ mutationFn: ({ id, action }: { id: string; action: 'retry' | 'delete' }) => api(`/jobs/${id}${action === 'retry' ? '/retry' : ''}`, { method: action === 'retry' ? 'POST' : 'DELETE' }), onSuccess: refresh });
   const upload = async (file?: File) => { if (!file) return; const body = new FormData(); body.set('file', file); await api('/assets', { method: 'POST', body }); await refresh(); };
@@ -34,14 +38,24 @@ export default function App() {
     <header className="topbar"><div className="brand"><span><Images size={19} /></span><div><strong>素材工坊</strong><small>独立图片生成与素材管理</small></div></div><div className="top-actions"><IconButton title="刷新" onClick={() => void refresh()}><RefreshCw size={17} /></IconButton><button className="button" onClick={() => setProviderOpen(true)}><Settings2 size={16} />Provider</button></div></header>
     <main>
       <section className="composer panel"><header><div><h1>创建图片</h1><p>{selectedProvider ? `${selectedProvider.name} / ${selectedProvider.model}` : '先配置图片 Provider'}</p></div><span className={`status ${selectedProvider?.status || 'untested'}`}>{selectedProvider?.status || '未配置'}</span></header>
-        <form onSubmit={(event: FormEvent) => { event.preventDefault(); if (selectedProvider && prompt.trim()) generate.mutate(); }}>
+        <nav className="mode-tabs"><button type="button" className={mode === 'manual' ? 'active' : ''} onClick={() => setMode('manual')}><Sparkles size={14} />自由模式</button><button type="button" className={mode === 'fantasy' ? 'active' : ''} onClick={() => setMode('fantasy')}><Aperture size={14} />摄影模拟</button></nav>
+        {mode === 'manual' ? <form onSubmit={(event: FormEvent) => { event.preventDefault(); if (selectedProvider && prompt.trim()) generate.mutate(); }}>
           <label><span>Provider / 模型</span><select value={selectedProvider?.id || ''} onChange={(event) => setProviderId(event.target.value)}><option value="">尚未配置</option>{providers.data?.items.map((item) => <option key={item.id} value={item.id}>{item.name} / {item.model}</option>)}</select></label>
           <label><span>提示词</span><textarea rows={9} value={prompt} onChange={(event) => setPrompt(event.target.value)} placeholder="描述你想生成的画面、构图、光线和风格..." /></label>
           <div className="size-presets"><button type="button" onClick={() => { setWidth(1024); setHeight(1024); }}>方图</button><button type="button" onClick={() => { setWidth(1536); setHeight(1024); }}>横图</button><button type="button" onClick={() => { setWidth(1024); setHeight(1536); }}>竖图</button></div>
           <div className="form-grid"><label><span>宽度</span><input type="number" value={width} step={16} onChange={(event) => setWidth(Number(event.target.value))} /></label><label><span>高度</span><input type="number" value={height} step={16} onChange={(event) => setHeight(Number(event.target.value))} /></label><label><span>质量</span><select value={quality} onChange={(event) => setQuality(event.target.value)}><option value="auto">自动</option><option value="low">低</option><option value="medium">中</option><option value="high">高</option></select></label><label><span>格式</span><select value={format} onChange={(event) => setFormat(event.target.value)}><option value="png">PNG</option><option value="jpeg">JPEG</option><option value="webp">WebP</option></select></label><label><span>数量</span><input type="number" min={1} max={4} value={count} onChange={(event) => setCount(Number(event.target.value))} /></label></div>
           {generate.error ? <p className="error">{generate.error.message}</p> : null}
           <button className="button primary generate" disabled={!selectedProvider || !prompt.trim() || generate.isPending}>{generate.isPending ? <LoaderCircle className="spin" size={17} /> : <Sparkles size={17} />}生成图片</button>
-        </form>
+        </form> : <form onSubmit={(event: FormEvent) => { event.preventDefault(); if (selectedProvider && fantasyEntries.length) fantasyGenerate.mutate(); }}>
+          <label><span>相机气质</span><select value={fantasyCamera} onChange={(event) => setFantasyCamera(event.target.value)}><option value="auto">自动（按题材选择）</option><option value="hasselblad">哈苏 Hasselblad</option><option value="leica">徕卡 Leica</option><option value="ricoh">理光 Ricoh GR</option></select></label>
+          <label><span>拍摄条目</span><textarea rows={7} value={fantasyText} onChange={(event) => setFantasyText(event.target.value)} placeholder={'每行一个条目，支持两种写法：\n\n1、北京胡同\n2、杭州西湖\n3、巴黎街头\n\n或：徕卡 / 街头 / 北京\n哈苏 / 湖面与绿色 / 杭州'} /></label>
+          <p className="hint">每行生成一张独立 3:4 竖版摄影拼图（内部 2-4 张同地点小图）；相机词会从描述中剥离并生效，最多 10 行。</p>
+          <div className="size-presets"><button type="button" onClick={() => { setWidth(1152); setHeight(1536); }}>竖版 3:4</button><button type="button" onClick={() => { setWidth(1024); setHeight(1536); }}>兼容 gpt-image</button><button type="button" onClick={() => { setWidth(1024); setHeight(1024); }}>方图</button></div>
+          <div className="form-grid"><label><span>宽度</span><input type="number" value={width} step={16} onChange={(event) => setWidth(Number(event.target.value))} /></label><label><span>高度</span><input type="number" value={height} step={16} onChange={(event) => setHeight(Number(event.target.value))} /></label><label><span>质量</span><select value={quality} onChange={(event) => setQuality(event.target.value)}><option value="auto">自动</option><option value="low">低</option><option value="medium">中</option><option value="high">高</option></select></label><label><span>格式</span><select value={format} onChange={(event) => setFormat(event.target.value)}><option value="png">PNG</option><option value="jpeg">JPEG</option><option value="webp">WebP</option></select></label></div>
+          {fantasyGenerate.error ? <p className="error">{fantasyGenerate.error.message}</p> : null}
+          <button className="button primary generate" disabled={!selectedProvider || !fantasyEntries.length || fantasyGenerate.isPending}>{fantasyGenerate.isPending ? <LoaderCircle className="spin" size={17} /> : <Aperture size={17} />}生成摄影组图（{fantasyEntries.length} 张）</button>
+          <FantasyExamples />
+        </form>}
       </section>
       <div className="content-column">
         <section className="library panel"><header><div><h2>素材库</h2><p>{assets.data?.items.length || 0} 个本地素材</p></div><label className="button"><Upload size={16} />上传<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => void upload(event.target.files?.[0])} /></label></header>
@@ -53,6 +67,11 @@ export default function App() {
     {providerOpen ? <ProviderDialog providers={providers.data?.items || []} onClose={() => setProviderOpen(false)} onChanged={refresh} /> : null}
     {preview ? <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && setPreview(null)}><div className="preview-modal"><header><div><strong>{preview.filename}</strong><small>{preview.width} x {preview.height}</small></div><IconButton title="关闭" onClick={() => setPreview(null)}><X size={18} /></IconButton></header><img src={assetUrl(preview.id)} alt={preview.filename} /></div></div> : null}
   </div>;
+}
+
+function FantasyExamples() {
+  const files = Array.from({ length: 16 }, (_unused, index) => `example-${String(index + 1).padStart(2, '0')}.webp`);
+  return <div className="fantasy-examples"><header><span>风格示例 · Fantasy 摄影模拟</span></header><div className="fantasy-examples-grid">{files.map((file) => <img key={file} src={`/fantasy-examples/${file}`} alt="Fantasy 摄影模拟风格示例" loading="lazy" />)}</div></div>;
 }
 
 function ProviderDialog({ providers, onClose, onChanged }: { providers: Provider[]; onClose(): void; onChanged(): Promise<unknown> }) {
